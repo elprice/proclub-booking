@@ -1,7 +1,7 @@
 var request = require('request')
 var request = request.defaults({jar:true})
 var cookies = request.jar()
-var credspluscalendar = require('./credsplusdates.json')
+var credentials = require('./credentials.json')
 var classes = require('./data/classes.json')
 
 //https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/index/id/37647/id/81
@@ -28,8 +28,8 @@ var classes = require('./data/classes.json')
     SIGNIN : {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/login/signin',
         FORM: {
-            'username': credspluscalendar.username,
-            'password': credspluscalendar.password,
+            'username': credentials.username,
+            'password': credentials.password,
             'actioninfo': 'Log In',
             'referer': null,
             'workshop_id':  null,
