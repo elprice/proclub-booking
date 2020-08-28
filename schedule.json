@@ -1,10 +1,9 @@
-//use military hour for start time aka 13 -> 2pm, 6 -> 6am
 {
-    "Sunday":null,
-    "Monday":18,
-    "Tuesday":18,//7pm
-    "Wednesday":null,
-    "Thursday":18,
-    "Friday":18,
-    "Saturday":null
+    "Sunday": null,
+    "Monday": 18,
+    "Tuesday": 18,
+    "Wednesday": null,
+    "Thursday": 18,
+    "Friday": 18,
+    "Saturday": null
 }
