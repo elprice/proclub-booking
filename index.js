@@ -2,7 +2,7 @@ var request = require('request')
 var request = request.defaults({jar:true})
 var cookies = request.jar()
 var credspluscalendar = require('./credsplusdates.json')
-
+var classes = require('./data/classes.json')
 
 //https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/index/id/37647/id/81
 
@@ -24,12 +24,9 @@ var credspluscalendar = require('./credsplusdates.json')
 
 ///proclub-belfitness/clientclasscalendar/index/id/20078/id/40
 
-var classid = '20081_40'
-
-const API = {
+/*const API = {
     SIGNIN : {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/login/signin',
-        
         FORM: {
             'username': credspluscalendar.username,
             'password': credspluscalendar.password,
@@ -41,25 +38,24 @@ const API = {
     },
     CHECK_AVAILABILITY: {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/checkavailable',
-        HEADERS: {},
         FORM: {
             classids: classid 
         }
     },
     BOOK_MULTIPLE_CLASS: {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/bookmutipleclass',
-        HEADERS: {},
         FORM: {
             'bookclass[]': classid,
             'hdwaitinglist': null,
             'booknow': 'Book Now'
         }
     }
-}
+}*/
 
+var today = new Date()
+console.log(today)
 
-
-request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM}, 
+/*request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM}, 
     function(err, res, body){
         request.post({url: API.CHECK_AVAILABILITY.URL, jar: cookies, form: API.CHECK_AVAILABILITY.FORM}, 
             function(err, res, body){
@@ -75,6 +71,6 @@ request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM},
             }
         )    
     }
-)
-
+)*/
+    
 
