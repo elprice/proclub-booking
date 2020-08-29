@@ -1,9 +1,8 @@
-let request = require('request');
-request = request.defaults({jar: true});
-let cookies = request.jar();
-let credentials = require('./credentials.json');
-let classes = require('./data/classes.json');
-let schedule = require('./schedule.json');
+const request = require('request').defaults({jar: true});
+const cookies = request.jar();
+const credentials = require('./credentials.json');
+const classes = require('./data/classes.json');
+const schedule = require('./schedule.json');
 // https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/index/id/37647/id/81
 
 
@@ -55,28 +54,44 @@ let schedule = require('./schedule.json');
 
 // all this date logic will probably break if your computer doing weird things
 // maybe one day it will get fixed to unix time
-const TODAY = new Date();
-const CURRENT_DAY_OF_WEEK = TODAY.getDay();
-const CURRENT_HOUR = TODAY.getHours();
+const MAX_DAYS_TO_TRY = 3;
+const DAY_IN_MS = 86400000;
+const now = Date.now();
+
+// ours is 1598662800000
+//1598637600000 is their 6pm 8/28
 
 // use military hours in the schedule.json file (18 -> 6pm)
-const daysToCheck = [];
-for (let i = 0; i < 3; i++) {
-    daysToCheck.push((currDayOfTheWeek + i) % 7);
+const timesToCheck = [];
+for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + i);
+    const dayOfWeek = targetDate.toLocaleString('en-us', {weekday: 'long'});
+    const scheduleHour = schedule[dayOfWeek];
+    const offsetInMS = targetDate.getTimezoneOffset() * 60 * 1000;
+    if (scheduleHour) {
+        targetDate.setHours(scheduleHour, 0, 0, 0);
+        timesToCheck.push(targetDate.getTime() - offsetInMS);
+    }
 }
 
-for (const day in daysToCheck){
+// now we have classes to find and schedule
 
+for (const target of timesToCheck) {
+    for (const slot of classes) {
+        if (slot.start == target) {
+            console.log('found this shit');
+        }
+    }
 }
 
-console.log(today)
-
-/*request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM}, 
+console.log(today);
+/* request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM},
     function(err, res, body){
-        request.post({url: API.CHECK_AVAILABILITY.URL, jar: cookies, form: API.CHECK_AVAILABILITY.FORM}, 
+        request.post({url: API.CHECK_AVAILABILITY.URL, jar: cookies, form: API.CHECK_AVAILABILITY.FORM},
             function(err, res, body){
                 if(body == '1'){
-                    request.post({url: API.BOOK_MULTIPLE_CLASS.URL, jar:cookies, form: API.BOOK_MULTIPLE_CLASS.FORM}, 
+                    request.post({url: API.BOOK_MULTIPLE_CLASS.URL, jar:cookies, form: API.BOOK_MULTIPLE_CLASS.FORM},
                         function(err, res, body){
                             console.log('Booking should have succeeded. Please check your email for confirmation. Please note that if a class is more than 3 days away it will not be booked and will not send an email but will not display an error.')
                         }
@@ -85,7 +100,7 @@ console.log(today)
                     console.log(body)
                 }
             }
-        )    
+        )
     }
-)*/    
+)*/
 

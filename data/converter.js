@@ -1,8 +1,7 @@
-var fs = require('fs')
-var calendar = require('./calendar.json')
+const fs = require('fs');
+const calendar = require('./calendar.json');
 
-
-/*var sample = {
+/* var sample = {
     "title":"VXBzdGFpcnMgTm9ydGggJiBTb3V0aCBGaXRuZXNzIENlbnRlcg==",
     "text_class":"",
     "start":1597039200000,
@@ -18,33 +17,33 @@ var calendar = require('./calendar.json')
 }*/
 
 simplifyWorkout = (workout) => {
-
     return {
-        "title": Buffer.from(workout.title, 'base64').toString(),
-        "start": workout.start,
-        "end": workout.end,
-        "id": workout.id,
-        "from_to": workout.from_to.substring(3,workout.from_to.length),
-        "booked_slot": workout.booked_slot
+        'title': Buffer.from(workout.title, 'base64').toString(),
+        'start': workout.start,
+        'end': workout.end,
+        'id': workout.id,
+        'from_to': workout.from_to.substring(3, workout.from_to.length),
+        'booked_slot': workout.booked_slot,
+    };
+};
+
+const workouts = [];
+
+for (const workout of calendar) {
+    const title = Buffer.from(workout.title, 'base64').toString();
+    if (title.includes('Free Weight')) {
+        workouts.push(simplifyWorkout(workout));
     }
 }
 
-//console.log(calendar)
+workouts.sort((a, b) => a.start - b.start );
 
-var workouts = []
-
-for(var item in calendar){
-    var workout = calendar[item]
-    if(Buffer.from(workout.title, 'base64').toString().includes('Free Weight')){
-        workouts.push(simplifyWorkout(workout))
+const outputPath = './data/classes.json';
+fs.writeFile(outputPath,
+    JSON.stringify(workouts),
+    (err) => {
+        if (!err) return;
+        console.log(err);
     }
-}
-
-workouts.sort((a,b) => a.start - b.start )
-
-for(var key in workouts){
-//    console.log(workouts[key])
-}
-
-var file = fs.writeFile('./data/classes.json', JSON.stringify(workouts), (err) => console.log(err));
+);
 

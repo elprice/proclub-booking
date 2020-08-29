@@ -11,7 +11,10 @@
         "ecmaVersion": 11
     },
     "rules": {
-        "linebreak-style": 0,
-        "indent":"off"
+        "linebreak-style":"off",
+        "indent":["error", 4],
+        "comma-dangle": ["error", {
+            "functions": "only-multiline"
+        }]
     }
 }
