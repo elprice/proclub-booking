@@ -23,45 +23,41 @@ const schedule = require('./schedule.json');
 
 // proclub-belfitness/clientclasscalendar/index/id/20078/id/40
 
-/* const API = {
-    SIGNIN : {
+const API = {
+    CLASS_ID: null, // this must be set of everything will break
+    SIGNIN: {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/login/signin',
         FORM: {
             'username': credentials.username,
             'password': credentials.password,
             'actioninfo': 'Log In',
             'referer': null,
-            'workshop_id':  null,
+            'workshop_id': null,
             'submit': null
         }
     },
     CHECK_AVAILABILITY: {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/checkavailable',
         FORM: {
-            classids: classid
+            classids: this.CLASS_ID
         }
     },
     BOOK_MULTIPLE_CLASS: {
         URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/bookmutipleclass',
         FORM: {
-            'bookclass[]': classid,
+            'bookclass[]': this.CLASS_ID,
             'hdwaitinglist': null,
             'booknow': 'Book Now'
         }
     }
-}*/
-
+};
 
 // all this date logic will probably break if your computer doing weird things
 // maybe one day it will get fixed to unix time
 const MAX_DAYS_TO_TRY = 3;
-const DAY_IN_MS = 86400000;
-const now = Date.now();
-
-// ours is 1598662800000
-//1598637600000 is their 6pm 8/28
 
 // use military hours in the schedule.json file (18 -> 6pm)
+// offset final target date to UTC time
 const timesToCheck = [];
 for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
     const targetDate = new Date();
@@ -76,31 +72,40 @@ for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
 }
 
 // now we have classes to find and schedule
-
+const classesToSchedule = [];
 for (const target of timesToCheck) {
     for (const slot of classes) {
         if (slot.start == target) {
             console.log('found this shit');
+            classesToSchedule.push(slot);
         }
     }
 }
 
-console.log(today);
-/* request.post({url: API.SIGNIN.URL, jar: cookies, form:API.SIGNIN.FORM},
-    function(err, res, body){
-        request.post({url: API.CHECK_AVAILABILITY.URL, jar: cookies, form: API.CHECK_AVAILABILITY.FORM},
-            function(err, res, body){
-                if(body == '1'){
-                    request.post({url: API.BOOK_MULTIPLE_CLASS.URL, jar:cookies, form: API.BOOK_MULTIPLE_CLASS.FORM},
-                        function(err, res, body){
-                            console.log('Booking should have succeeded. Please check your email for confirmation. Please note that if a class is more than 3 days away it will not be booked and will not send an email but will not display an error.')
-                        }
-                    )
-                }else{
-                    console.log(body)
-                }
+for (const slot of classesToSchedule) {
+    if (slot.title == 'Free Weight Center Access') {
+        request.post({url: API.SIGNIN.URL, jar: cookies, form: API.SIGNIN.FORM},
+            function(err, res, body) {
+                request.post({url: API.CHECK_AVAILABILITY.URL,
+                    jar: cookies,
+                    form: API.CHECK_AVAILABILITY.FORM},
+                function(err, res, body) {
+                    if (body == '1') {
+                        request.post({url: API.BOOK_MULTIPLE_CLASS.URL,
+                            jar: cookies,
+                            form: API.BOOK_MULTIPLE_CLASS.FORM},
+                        function(err, res, body) {
+                            console.log('Booking should have succeeded. ' +
+                                    'Please check your email to confirm. ' +
+                                    'Failure will not display an error.');
+                        });
+                    } else {
+                        console.log(body);
+                    }
+                });
             }
-        )
-    }
-)*/
-
+        );
+    }(API.CLASS_ID = slot.id);
+}
+// rewrite apiHelper as a class
+//this.classid
