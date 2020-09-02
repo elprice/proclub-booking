@@ -3,7 +3,7 @@ a script for bypassing the studiobookingsonline page to reserve your free weight
 
 # usage
 1. clone the repo
-2. install node js [https://nodejs.org/en/](https://nodejs.org/en/)
+2. install [nodejs](https://nodejs.org/en/)
 3. navigate to the repo directory `npm install`
 4. set your credentials in the `credentials.json` file. This supports multiple users.
 5. set the hour your workout start hour for each day in MILITARY time within `schedule.json`
