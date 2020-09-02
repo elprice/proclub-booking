@@ -9,6 +9,8 @@ const schedule = require('./schedule.json');
 const ApiHelper = require('./ApiHelper').ApiHelper;
 
 const MAX_DAYS_TO_TRY = 3;
+const NUM_USERS = credentials.logins.filter((login) => login.username && login.upassword).length;
+let successfulRequests = 0;
 
 const timesToCheck = [];
 for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
@@ -52,6 +54,7 @@ for (const user of credentials.logins) {
                                         request.post({url: apiHelper.API.BOOK_MULTIPLE_CLASS.URL, jar: cookies, form: apiHelper.API.BOOK_MULTIPLE_CLASS.FORM},
                                             function(err, res, body) {
                                                 console.log(successMaybeMessage(slot));
+                                                successfulRequests++;
                                             });
                                     } else {
                                         console.log(fallbackMessage(slot));
@@ -65,6 +68,7 @@ for (const user of credentials.logins) {
                                                         request.post({url: fallbackApiHelper.API.BOOK_MULTIPLE_CLASS.URL, jar: cookies, form: fallbackApiHelper.API.BOOK_MULTIPLE_CLASS.FORM},
                                                             function(err, res, body) {
                                                                 console.log(successMaybeMessage(classesToSchedule[index+1]));
+                                                                successfulRequests++;
                                                             });
                                                     } else {
                                                         console.log(failureMessage(classesToSchedule[index+1]));
@@ -94,3 +98,8 @@ function fallbackMessage(slot) {
 function failureMessage(slot) {
     return 'Failed for ' + slot.id + ' at ' + slot.from_to + '. Check your email to confirm. Check the website to be sure.';
 }
+
+// block the script from exiting
+(function wait() {
+    if (successfulRequests < (classesToSchedule.length * NUM_USERS)) setTimeout(wait, 5000);
+})();
