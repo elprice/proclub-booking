@@ -9,7 +9,7 @@ a script for bypassing the studiobookingsonline page to reserve your free weight
 5. set the hour your workout start hour for each day in MILITARY time within `schedule.json`
 6. `node start` to run the app. You may set it to run daily with a scheduled task if you have a set schedule.
 
-Note: 
+## notes: 
 * hard coded for 'Free Weight Center Access' and 'Free Weights 2 (Previously Cardio Theatre)' slots
 * hard coded to only check 3 days into the future at this time (per the booking websites reservation rules)
 * meant to be a very quick and time saving solution to avoid the painful website booking website
