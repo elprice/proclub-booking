@@ -8,7 +8,7 @@ a script for bypassing the studiobookingsonline page to reserve your free weight
 4. set your credentials in the `credentials.json` file. This supports multiple users.
 5. set the hour your workout start hour for each day in MILITARY time within `schedule.json`
 6. `npm start` to run the app. You may set it to run daily with a scheduled task if you have a set schedule.
-7. there's a looping condition check. if the script fails to finish and exit you may crash it with ctrl+c
+7. a looping condition check prevents the script from closing unless all requests succeed (I know I know). crash with ctrl+c if it loops forever.
 
 ## notes: 
 * I am not responsible for any issues resulting from the use of this script regarding your account, relationship with proclub, or with studiobookingsonline
