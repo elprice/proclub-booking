@@ -1,63 +1,15 @@
+/* eslint-disable require-jsdoc */
+/* eslint-disable no-unused-vars */
+/* eslint-disable max-len */
+
 const request = require('request').defaults({jar: true});
-const cookies = request.jar();
 const credentials = require('./credentials.json');
 const classes = require('./data/classes.json');
 const schedule = require('./schedule.json');
-// https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/index/id/37647/id/81
+const ApiHelper = require('./ApiHelper').ApiHelper;
 
-
-// 6 PM unsupervised workout is 40 for weekdays and 98 for weekends ?
-
-// 20078_40 8/25
-// 20079_40 8/26
-// 20080_40 8/27
-// 20081_40 8/28
-
-// weekend (sat/sun slots) look like this
-// 43883_98 8/29
-// 43884_98 8/30
-// 43885_98 9/05
-
-// 3 chars ? -> incremented value -> recurrclassid
-// classid
-
-// proclub-belfitness/clientclasscalendar/index/id/20078/id/40
-
-const API = {
-    CLASS_ID: null, // this must be set of everything will break
-    SIGNIN: {
-        URL: 'https://studiobookingsonline.com/proclub-belfitness/login/signin',
-        FORM: {
-            'username': credentials.username,
-            'password': credentials.password,
-            'actioninfo': 'Log In',
-            'referer': null,
-            'workshop_id': null,
-            'submit': null
-        }
-    },
-    CHECK_AVAILABILITY: {
-        URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/checkavailable',
-        FORM: {
-            classids: this.CLASS_ID
-        }
-    },
-    BOOK_MULTIPLE_CLASS: {
-        URL: 'https://studiobookingsonline.com/proclub-belfitness/clientclasscalendar/bookmutipleclass',
-        FORM: {
-            'bookclass[]': this.CLASS_ID,
-            'hdwaitinglist': null,
-            'booknow': 'Book Now'
-        }
-    }
-};
-
-// all this date logic will probably break if your computer doing weird things
-// maybe one day it will get fixed to unix time
 const MAX_DAYS_TO_TRY = 3;
 
-// use military hours in the schedule.json file (18 -> 6pm)
-// offset final target date to UTC time
 const timesToCheck = [];
 for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
     const targetDate = new Date();
@@ -71,41 +23,74 @@ for (let i = 0; i < MAX_DAYS_TO_TRY; i++) {
     }
 }
 
-// now we have classes to find and schedule
 const classesToSchedule = [];
 for (const target of timesToCheck) {
     for (const slot of classes) {
         if (slot.start == target) {
-            console.log('found this shit');
             classesToSchedule.push(slot);
         }
     }
 }
 
-for (const slot of classesToSchedule) {
-    if (slot.title == 'Free Weight Center Access') {
-        request.post({url: API.SIGNIN.URL, jar: cookies, form: API.SIGNIN.FORM},
-            function(err, res, body) {
-                request.post({url: API.CHECK_AVAILABILITY.URL,
-                    jar: cookies,
-                    form: API.CHECK_AVAILABILITY.FORM},
-                function(err, res, body) {
-                    if (body == '1') {
-                        request.post({url: API.BOOK_MULTIPLE_CLASS.URL,
-                            jar: cookies,
-                            form: API.BOOK_MULTIPLE_CLASS.FORM},
-                        function(err, res, body) {
-                            console.log('Booking should have succeeded. ' +
-                                    'Please check your email to confirm. ' +
-                                    'Failure will not display an error.');
-                        });
-                    } else {
-                        console.log(body);
+console.log('Will attempt to schedule these dates: \n' + [...new Set(classesToSchedule.map((slot) => slot.from_to))].join('\n'));
+
+for (const user of credentials.logins) {
+    if (user.username && user.password) {
+        for (const slot of classesToSchedule) {
+            if (slot.title == 'Free Weight Center Access') {
+                const cookies = request.jar();
+                const apiHelper = new ApiHelper(user.username, user.password, slot.id);
+                request.post({url: apiHelper.API.SIGNIN.URL, jar: cookies, form: apiHelper.API.SIGNIN.FORM},
+                    function(err, res, body) {
+                        if ( !res.headers['location']) {
+                            console.log('Login failed. Check credentials or blame the programmer.');
+                            process.exit(1);
+                        } else {
+                            request.post({url: apiHelper.API.CHECK_AVAILABILITY.URL, jar: cookies, form: apiHelper.API.CHECK_AVAILABILITY.FORM},
+                                function(err, res, body) {
+                                    if (body == '1') {
+                                        request.post({url: apiHelper.API.BOOK_MULTIPLE_CLASS.URL, jar: cookies, form: apiHelper.API.BOOK_MULTIPLE_CLASS.FORM},
+                                            function(err, res, body) {
+                                                console.log(successMaybeMessage(slot));
+                                            });
+                                    } else {
+                                        console.log(fallbackMessage(slot));
+                                        const index = classesToSchedule.indexOf(slot);
+                                        // because of sorting the next slot in the list should be the free weights 2 slot.. so try it now
+                                        if (index+1 < classesToSchedule.length && classesToSchedule[index+1].title == 'Free Weights 2 (Previously Cardio Theatre)') {
+                                            const fallbackApiHelper = new ApiHelper(user.username, user.password, classesToSchedule[index+1].id);
+                                            request.post({url: fallbackApiHelper.API.CHECK_AVAILABILITY.URL, jar: cookies, form: fallbackApiHelper.API.CHECK_AVAILABILITY.FORM},
+                                                function(err, res, body) {
+                                                    if (body == '1') {
+                                                        request.post({url: fallbackApiHelper.API.BOOK_MULTIPLE_CLASS.URL, jar: cookies, form: fallbackApiHelper.API.BOOK_MULTIPLE_CLASS.FORM},
+                                                            function(err, res, body) {
+                                                                console.log(successMaybeMessage(classesToSchedule[index+1]));
+                                                            });
+                                                    } else {
+                                                        console.log(failureMessage(classesToSchedule[index+1]));
+                                                    }
+                                                }
+                                            );
+                                        }
+                                    }
+                                }
+                            );
+                        }
                     }
-                });
+                );
             }
-        );
-    }(API.CLASS_ID = slot.id);
+        }
+    }
 }
-// rewrite apiHelper as a class
-//this.classid
+
+function successMaybeMessage(slot) {
+    return 'Booking should have succeeded for classid ' + slot.id + ' at ' + slot.from_to + '.';
+}
+
+function fallbackMessage(slot) {
+    return 'Free Weight Center Access was unavailable for ' + slot.from_to + '. Will fallback to second slot now.';
+}
+
+function failureMessage(slot) {
+    return 'Failed for ' + slot.id + ' at ' + slot.from_to + '. Check your email to confirm. Check the website to be sure.';
+}
