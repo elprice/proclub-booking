@@ -7,9 +7,11 @@ a script for bypassing the studiobookingsonline page to reserve your free weight
 3. navigate to the repo directory `npm install`
 4. set your credentials in the `credentials.json` file. This supports multiple users.
 5. set the hour your workout start hour for each day in MILITARY time within `schedule.json`
-6. `node start` to run the app. You may set it to run daily with a scheduled task if you have a set schedule.
+6. `npm start` to run the app. You may set it to run daily with a scheduled task if you have a set schedule.
+7. there's a looping condition check. if the script fails to finish and exit you may crash it with ctrl+c
 
 ## notes: 
+* I am not responsible for any issues resulting from the use of this script regarding your account, relationship with proclub, or with studiobookingsonline
 * hard coded for 'Free Weight Center Access' and 'Free Weights 2 (Previously Cardio Theatre)' slots
 * hard coded to only check 3 days into the future at this time (per the booking websites reservation rules)
 * meant to be a very quick and time saving solution to avoid the painful website booking website
