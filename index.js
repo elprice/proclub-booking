@@ -101,5 +101,5 @@ function failureMessage(slot) {
 
 // block the script from exiting
 (function wait() {
-    if (successfulRequests < ((classesToSchedule.length/2) * NUM_USERS)) setTimeout(wait, 5000);
+    if (successfulRequests < (Math.ceil((classesToSchedule.length/2)) * NUM_USERS)) setTimeout(wait, 5000);
 })();
