@@ -1,9 +1,9 @@
 {
     "Sunday": 18,
-    "Monday": 18,
-    "Tuesday": null,
+    "Monday": null,
+    "Tuesday": 18,
     "Wednesday": 18,
-    "Thursday": 18,
-    "Friday": null,
-    "Saturday": null
+    "Thursday": null,
+    "Friday": 18,
+    "Saturday": 18
 }

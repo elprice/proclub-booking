@@ -9,7 +9,7 @@ const schedule = require('./schedule.json');
 const ApiHelper = require('./ApiHelper').ApiHelper;
 
 const MAX_DAYS_TO_TRY = 3;
-const NUM_USERS = credentials.logins.filter((login) => login.username && login.upassword).length;
+const NUM_USERS = credentials.logins.filter((login) => login.username && login.password).length;
 let successfulRequests = 0;
 
 const timesToCheck = [];
@@ -101,5 +101,5 @@ function failureMessage(slot) {
 
 // block the script from exiting
 (function wait() {
-    if (successfulRequests < (classesToSchedule.length * NUM_USERS)) setTimeout(wait, 5000);
+    if (successfulRequests < ((classesToSchedule.length/2) * NUM_USERS)) setTimeout(wait, 5000);
 })();
